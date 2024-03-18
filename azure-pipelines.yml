@@ -28,7 +28,7 @@ stages:
         backendAzureRmResourceGroupName: 'terraform-state'
         backendAzureRmStorageAccountName: 'stbestrongeastus001'
         backendAzureRmContainerName: 'cibestrong001'
-        backendAzureRmKey: 'terraform.tfstate'
+        backendAzureRmKey: 'terraform.conf.tfstate'
     - task: TerraformTaskV4@4
       displayName: 'Tf validate'
       inputs:
