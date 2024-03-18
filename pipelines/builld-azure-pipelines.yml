@@ -17,11 +17,6 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: DownloadBuildArtifacts@0
-      displayName: 'Download Build Artifacts'
-      inputs:
-        artifactName: '$(Build.BuildId)-build'
-        downloadPath: '$(System.ArtifactsDirectory)'
     - task: ArchiveFiles@2
       displayName: 'Archive Files'
       inputs:
