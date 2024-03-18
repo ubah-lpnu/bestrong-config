@@ -1,0 +1,56 @@
+trigger: none
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+- group: terraform-creds
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+    
+    - task: TerraformTaskV4@4
+      displayName: 'Tf Init'
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: 'Azure for Students(85bd95c0-eabe-403c-87b6-f72ae70ec867)'
+        backendAzureRmResourceGroupName: 'terraform-state'
+        backendAzureRmStorageAccountName: 'stbestrongeastus001'
+        backendAzureRmContainerName: 'cibestrong001'
+        backendAzureRmKey: 'terraform.conf.tfstate'
+    - task: TerraformTaskV4@4
+      displayName: 'Tf validate'
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
+    - task: TerraformTaskV4@4
+      displayName: 'Tf plan'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        commandOptions: '-out $(Build.SourcesDirectory)/tfplanfile -var "ARM_CLIENT_ID=$(TF_ARM_CLIENT_ID)" -var "ARM_SUBSCRIPTION_ID=$(TF_ARM_SUBSCRIPTION_ID)" -var "ARM_TENANT_ID=$(TF_ARM_TENANT_ID)" -var "ARM_CLIENT_SECRET=$(TF_ARM_CLIENT_SECRET)" -var "administrator_login=$(TF_administrator_login)" -var "administrator_login_password=$(TF_administrator_login_password)"'
+        environmentServiceNameAzureRM: 'Azure for Students(85bd95c0-eabe-403c-87b6-f72ae70ec867)'
+    - task: ArchiveFiles@2
+      displayName: 'Archive Files'
+      inputs:
+        rootFolderOrFile: '$(Build.SourcesDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(Build.BuildId)-build'
+        publishLocation: 'Container'
